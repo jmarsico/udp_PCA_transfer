@@ -44,4 +44,5 @@ void PWM::setPWM(int channel, int on, int off)
                         wiringPiI2CWriteReg8(fd, LED0_ON_H+4*channel, on >> 8);
                         wiringPiI2CWriteReg8(fd, LED0_OFF_L+4*channel, off & 0xFF);
                         wiringPiI2CWriteReg8(fd, LED0_OFF_H+4*channel, off >> 8);
+                        
 }
