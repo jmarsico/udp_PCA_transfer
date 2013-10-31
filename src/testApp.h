@@ -15,11 +15,22 @@ public:
 	void setup();
 	void update();
 	void draw();
+	void runLights(int br[]);
 
 	int val;
 	int valInc;
 
+
+	int br[48];
+	int cellSize;
+	float cellSizeFl;
+
+	int	cameraWidth;
+	int	cameraHeight;
+
 	PWM* pwm;
+	ofVideoGrabber videoGrabber;
+
 
 	
 
