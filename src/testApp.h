@@ -1,10 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-//#include "Adafruit_TLC5947.h"
-//#include "wiringPi.h"
-#include "wiringPiI2C.h"
-#include "pwmlib.h"
+#include "PCA9685.h"
 
  // set to -1 to not use the enable pin (its optional)
 
@@ -28,14 +25,13 @@ public:
 	int	cameraWidth;
 	int	cameraHeight;
 
-	PWM* pwm;
+	
+	int numBoards;
+
 	ofVideoGrabber videoGrabber;
+	PCA9685* pca; //initialize the class with number of boards
 
 
-	
 
-		
-	
-		//Adafruit_TLC5947* tlc; 
 	
 };

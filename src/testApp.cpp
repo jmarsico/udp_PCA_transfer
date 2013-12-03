@@ -9,24 +9,15 @@
 void testApp::setup(){
 	//ofSetFrameRate(15);
 	
-	pwm = new PWM(0x40, true);
-	pwm ->setPWMFreq(60);
-	
-	//exit(1);
-	/*int fd = wiringPiI2CSetup(0x40);
-	if(fd == -1)
-	{
-		ofLogVerbose("setup failed");
-	} else
-	{
-		printf("%d\n", fd);
-	}
-	*/
+	//construct new PCA9685 object with the number of boards you're using
+	numBoards = 2;
+	pca = new PCA9685(numBoards);
+
 
 	ofSetVerticalSync(false);
 	cameraWidth		= 320;
 	cameraHeight	= 240;
-	cellSize = 40;
+	cellSize = 48;
 	cellSizeFl  = (float)cellSize;
 	
 	videoGrabber.listDevices();
@@ -39,26 +30,31 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::update(){
 
-
 	/////////////TEST BLINK FIRST LED/////////////////
-	/*
-	pwm->setPWM(0,0,1);
+/*
+	pca->setLED(0,4095);
+	pca->setLED(16, 4095);
 	sleep(1);
-	pwm->setPWM(0,0,4095);
+
+	pca->setLED(0,1);
+	pca->setLED(16, 1);
 	sleep(1);
-	*/
+*/
+	
 
 	///////////// RAMP TEST ////////////////////
-    /*
-	for(int val = 1; val < 4096; val+=10)
+    
+/*	
+	for(int val = 1; val < 4096; val+=100)
 	{
-		for(int i = 0; i < 16; i++)
+		for(int i = 0; i < 16*numBoards; i++)
 		{
-			pwm->setPWM(i,0,val);
+			pca->setLED(i, val);
+
 		}
 	}
-	*/
-
+*/		
+	//////////////////Prod Section //////////////////
 	ofBackground(10, 10, 10);
 	
 	videoGrabber.update();
@@ -68,7 +64,6 @@ void testApp::update(){
     {
         ofPixels pix = videoGrabber.getPixelsRef(); 
         pix.mirror(false, true); 
-       // invertedTexture.loadData(pix);
 
         for(int i = 0; i < cameraWidth/cellSize; i++)
         {
@@ -80,6 +75,7 @@ void testApp::update(){
 			}
         }
     }
+
     /*
     for(int i = 0; i < 48; i++)
     {
@@ -94,16 +90,17 @@ void testApp::update(){
 
 void testApp::runLights(int br[])
 {
-	int lightBright[16];
-	for(int i = 0; i <16; i++)
+	int lightBright[16*numBoards];
+	for(int i = 0; i <16*numBoards; i++)
     {
     	lightBright[i] = ofMap(br[i], 0, 255, 0, 2000);
-    	pwm->setPWM(i, 0, lightBright[i]);
+    	pca->setLED(i, lightBright[i]);
 
-    	//printf("%d, ", lightBright[i]);
+    	printf("channel: %d,  value: %d\n", i, lightBright[i]);
     }
-   // printf("\n");
 }
+
+
 
 //--------------------------------------------------------------
 void testApp::draw(){

@@ -2,8 +2,8 @@
 
 PWM::PWM(int address,bool debug)
 {
-        fd = wiringPiI2CSetup(0x40);
         Address = address;
+        fd = wiringPiI2CSetup(Address);
         Debug = debug;
         if(Debug)
                 printf("Reseting PCA9685\n");
