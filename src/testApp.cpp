@@ -19,10 +19,17 @@ void testApp::setup(){
 	cameraHeight	= 240;
 	cellSize = 48;
 	cellSizeFl  = (float)cellSize;
+	numPixels = (cameraWidth/cellSize) * (cameraHeight/cellSize);
+
+	displayCoeff = 2;
 	
 	videoGrabber.listDevices();
 	videoGrabber.setDesiredFrameRate(60); 
 	videoGrabber.initGrabber(cameraWidth, cameraHeight);
+	pixels = new unsigned char[numPixels];
+
+    //pixelTexture.allocate(cameraWidth, cameraHeight, GL_LUMINANCE);
+
 
 }
 
@@ -55,7 +62,7 @@ void testApp::update(){
 	}
 */		
 	//////////////////Prod Section //////////////////
-	ofBackground(10, 10, 10);
+	
 	
 	videoGrabber.update();
 
@@ -71,24 +78,18 @@ void testApp::update(){
 			{
 				int x = i*cellSize;
 				int y = j*cellSize;
-				br[(i*cameraHeight/cellSize)+j] = pix.getColor(x,y).getLightness();
+				br[(i*cameraHeight/cellSize)+j] = (float)pix.getColor(x,y).getLightness();
 			}
         }
     }
 
-    /*
-    for(int i = 0; i < 48; i++)
-    {
-    	printf("%d, ", br[i]);
-    }
-    printf("\n");
-    */
+
     runLights(br); 
 }
 
 //--------------------------------------------------------------
 
-void testApp::runLights(int br[])
+void testApp::runLights(float br[])
 {
 	int lightBright[16*numBoards];
 	for(int i = 0; i <16*numBoards; i++)
@@ -96,29 +97,49 @@ void testApp::runLights(int br[])
     	lightBright[i] = ofMap(br[i], 0, 255, 0, 2000);
     	pca->setLED(i, lightBright[i]);
 
-    	printf("channel: %d,  value: %d\n", i, lightBright[i]);
+    	//printf("channel: %d,  value: %d\n", i, lightBright[i]);
     }
 }
 
-
+	
 
 //--------------------------------------------------------------
 void testApp::draw(){
 	
-/*
+	int leftSpace = 100;
+	int space = 200-cellSize;
+	int height = 230;
+
+	ofBackground(10, 10, 10);
+
+	ofSetColor(255);
+	videoGrabber.draw(leftSpace, height, cameraWidth*displayCoeff, cameraHeight*displayCoeff);
+	ofDrawBitmapString("Source", leftSpace, height-20);
+
+
+			
+	
+		//ofTranslate(cameraWidth+100,100);
+		//pixelTexture.draw(0,0);
+	
+	ofDrawBitmapString("Pixelated and Mirrored", cameraWidth*displayCoeff+leftSpace+space+cellSize, height - 20);
+
 	for(int i = 0; i<cameraWidth/cellSize; i++)
 		{
 			for(int j = 0; j < cameraHeight/cellSize; j++)
 			{
 				ofPushMatrix();
-				ofTranslate(i*cellSize*3, j*cellSize*3);
+				ofTranslate(space,0);
+				ofTranslate(i*cellSize*displayCoeff+cameraWidth*displayCoeff+space, j*cellSize*displayCoeff+height);
 					ofSetColor(br[(i*cameraHeight/cellSize)+j]);
-					ofRect(0.0,0.0,cellSizeFl*3, cellSizeFl*3);
+					ofRect(0.0,0.0,cellSizeFl*displayCoeff, cellSizeFl*displayCoeff);
 				ofPopMatrix();
 			}
 		}
-*/
-	ofSetColor(0,255,0);
+	//ofPopMatrix();
+	
+
+	ofSetColor(255);
 	ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate(), 0), 5, ofGetWindowHeight()-5);
     
 }

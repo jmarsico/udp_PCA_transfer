@@ -12,23 +12,28 @@ public:
 	void setup();
 	void update();
 	void draw();
-	void runLights(int br[]);
+	void runLights(float br[]);
 
 	int val;
 	int valInc;
 
 
-	int br[48];
+	float br[48];
+	unsigned char* pixels;
 	int cellSize;
 	float cellSizeFl;
+	int numPixels;
 
 	int	cameraWidth;
 	int	cameraHeight;
+
+	float displayCoeff;
 
 	
 	int numBoards;
 
 	ofVideoGrabber videoGrabber;
+	//ofTexture pixelTexture;
 	PCA9685* pca; //initialize the class with number of boards
 
 
