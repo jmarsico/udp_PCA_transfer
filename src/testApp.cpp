@@ -11,7 +11,7 @@ void testApp::setup(){
 	
 	//construct new PCA9685 object with the number of boards you're using
 	numBoards = 2;
-	pca = new PCA9685(numBoards);
+	//pca = new PCA9685(numBoards);
 
 
 	ofSetVerticalSync(false);
@@ -21,7 +21,7 @@ void testApp::setup(){
 	cellSizeFl  = (float)cellSize;
 	numPixels = (cameraWidth/cellSize) * (cameraHeight/cellSize);
 
-	displayCoeff = 2;
+	displayCoeff = 1;
 	
 	videoGrabber.listDevices();
 	videoGrabber.setDesiredFrameRate(60); 
@@ -72,23 +72,23 @@ void testApp::update(){
         ofPixels pix = videoGrabber.getPixelsRef(); 
         pix.mirror(false, true); 
 
-        for(int i = 0; i < cameraWidth/cellSize; i++)
+        for(int j = 0; j < cameraHeight/cellSize; j++)
         {
-        	for (int j = 0; j < cameraHeight/cellSize; j++)
+        	for (int i = 0; i < cameraWidth/cellSize; i++)
 			{
 				int x = i*cellSize;
 				int y = j*cellSize;
-				br[(i*cameraHeight/cellSize)+j] = (float)pix.getColor(x,y).getLightness();
+				br[(j*cameraWidth/cellSize)+i] = (float)pix.getColor(x,y).getLightness();
 			}
         }
     }
 
 
-    runLights(br); 
+    //runLights(br);
 }
 
 //--------------------------------------------------------------
-
+/*
 void testApp::runLights(float br[])
 {
 	int lightBright[16*numBoards];
@@ -101,7 +101,7 @@ void testApp::runLights(float br[])
     }
 }
 
-	
+	*/
 
 //--------------------------------------------------------------
 void testApp::draw(){
@@ -124,15 +124,17 @@ void testApp::draw(){
 	
 	ofDrawBitmapString("Pixelated and Mirrored", cameraWidth*displayCoeff+leftSpace+space+cellSize, height - 20);
 
-	for(int i = 0; i<cameraWidth/cellSize; i++)
+	for(int j = 0; j < cameraHeight/cellSize; j++)
 		{
-			for(int j = 0; j < cameraHeight/cellSize; j++)
+			for(int i = 0; i < cameraWidth/cellSize; i++)
 			{
 				ofPushMatrix();
 				ofTranslate(space,0);
 				ofTranslate(i*cellSize*displayCoeff+cameraWidth*displayCoeff+space, j*cellSize*displayCoeff+height);
-					ofSetColor(br[(i*cameraHeight/cellSize)+j]);
+					ofSetColor(br[j*cameraWidth/cellSize+i]);
 					ofRect(0.0,0.0,cellSizeFl*displayCoeff, cellSizeFl*displayCoeff);
+                    ofSetColor(255,0,0);
+                    ofDrawBitmapString(ofToString(j*cameraWidth/cellSize+i), 0,10);
 				ofPopMatrix();
 			}
 		}
