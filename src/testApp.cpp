@@ -94,13 +94,13 @@ void testApp::runLights(float br[])
 	int lightBright[16*numBoards];
 	for(int i = 0; i <16*numBoards; i++)
     {
-    	lightBright[i] = ofMap(br[i], 0, 255, 0, 2000);
+    	lightBright[i] = ofMap(br[i], 0, 255, 0, 4095);
     	pca->setLED(i, lightBright[i]);
 
     	//printf("channel: %d,  value: %d\n", i, lightBright[i]);
     }
 }
-
+#
 	
 
 //--------------------------------------------------------------
