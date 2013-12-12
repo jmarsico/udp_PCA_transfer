@@ -33,6 +33,8 @@ void testApp::setup()
     time = 0;
     timeInc = 0.1;
 
+	//on start-up, run through light test
+	testLights();
 
 }
 
@@ -64,8 +66,7 @@ void testApp::update()
 
     makeNoise();
     runLights(br);
-    ofLog() << ofGetFrameRate() ;
-    
+    ofLog() << ofGetFrameRate() ;  
 }
 
 
@@ -101,9 +102,9 @@ void testApp::runLights(float br[])
     {
     	lightBright[i] = br[i] + noiseVal[i];
     	
-    	//pca->setLED(i, br[i]);
-    	//pca->setLED(i, noiseVal[i]);
-    	pca->setLED(i, lightBright[i]);
+    	//pca->setLED(i, br[i]);				//video only
+    	//pca->setLED(i, noiseVal[i]);			//noise only
+    	pca->setLED(i, lightBright[i]);			//video and noise
     	
 
     	//ofLog() << "channel: " << i << " value: " << noiseVal[i];
@@ -162,31 +163,13 @@ void testApp::draw(){
 
 void testApp::testLights(void)
 {
-    
-	/////////////TEST BLINK FIRST LED/////////////////
-    /*
-     pca->setLED(0,4095);
-     pca->setLED(16, 4095);
-     sleep(1);
-     
-     pca->setLED(0,1);
-     pca->setLED(16, 1);
-     sleep(1);
-     */
-	
-    
-	///////////// RAMP TEST ////////////////////
-    
-    /*
-     for(int val = 1; val < 4096; val+=100)
-     {
-     for(int i = 0; i < 16*numBoards; i++)
-     {
-     pca->setLED(i, val);
-     
-     }
-     }
-     */
+	for(int val = 1; val < 4096; val+=200)
+	{
+	    for(int i = 0; i < 16*numBoards; i++)
+	    {
+		    pca->setLED(i, val); 
+	    }
+	}
 }
 
 
