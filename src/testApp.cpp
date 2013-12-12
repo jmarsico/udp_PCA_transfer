@@ -5,12 +5,11 @@
 void testApp::setup()
 {
 	
-/*
+
 	//construct new PCA9685 object with the number of boards you're using
 	numBoards = 2;
 	pca = new PCA9685(numBoards);
 
-*/
 	
     ofSetVerticalSync(false);
 	cameraWidth		= 320;
@@ -27,11 +26,12 @@ void testApp::setup()
 	videoGrabber.initGrabber(cameraWidth, cameraHeight);
 	pixels = new unsigned char[numPixels];
 
-    noiseSpeedX = 0.005;
-    noiseSpeedY = 0.005;
-    noiseAmp = 125;
+    noiseSpeedX = 0.01;
+    noiseSpeedY = 0.01;
+    noiseAmp = 2000;
     
     time = 0;
+    timeInc = 0.1;
 
 
 }
@@ -42,8 +42,6 @@ void testApp::update()
 {
 	
 //////////////////Prod Section //////////////////
-	
-	
 	videoGrabber.update();
 
 	
@@ -59,25 +57,31 @@ void testApp::update()
 				int x = i*cellSize;
 				int y = j*cellSize;
 				br[(j*(cameraWidth/cellSize))+i] = (float)pix.getColor(x,y).getLightness();
+				br[(j*(cameraWidth/cellSize))+i] = ofMap(br[(j*(cameraWidth/cellSize))+i], 0, 255, 0, 2000);
 			}
         }
     }
 
-
-    //runLights(br);
     makeNoise();
+    runLights(br);
+    ofLog() << ofGetFrameRate() ;
+    
 }
 
+
+///////////////////////// NOISE ///////////////////////////////////
 void testApp::makeNoise(void)
 {
     for(int i = 0; i < 30; i++)
     {
-        noiseVal[i] = noiseAmp * ofNoise(time * noiseSpeedX*(i+10), time*noiseSpeedY*(10-i));
-        
+        noiseVal[i] = abs(noiseAmp * ofNoise(time * noiseSpeedX*(i+10), time*noiseSpeedY*(10-i)));
+       // ofLog() << "index: " << i << " || value: " << noiseVal[i];
     }
-    time = ofGetElapsedTimef();
+    time += timeInc;
 }
 
+
+/////////////////// STEVEN'S LAW /////////////////////////////////
 float testApp::stevensLaw(float val)
 {
     float newVal;
@@ -89,32 +93,31 @@ float testApp::stevensLaw(float val)
     return newVal;
 }
 
-//--------------------------------------------------------------
-/*
- 
+////////////////////// RUN LIGHTS //////////////////////////////////
 void testApp::runLights(float br[])
 {
 	int lightBright[16*numBoards];
-	for(int i = 0; i <16*numBoards; i++)
+	for(int i = 0; i <30; i++)
     {
-    	lightBright[i] = ofMap(br[i], 0, 255, 0, 4095);
+    	lightBright[i] = br[i] + noiseVal[i];
+    	
+    	//pca->setLED(i, br[i]);
+    	//pca->setLED(i, noiseVal[i]);
     	pca->setLED(i, lightBright[i]);
+    	
 
-    	//printf("channel: %d,  value: %d\n", i, lightBright[i]);
+    	//ofLog() << "channel: " << i << " value: " << noiseVal[i];
     }
 }
-<<<<<<< HEAD
-#
-	
-=======
 
-*/
 
->>>>>>> 2ee0dc4b5ec1e288b09b5c1390df143ed5f41a90
+
+
 
 //--------------------------------------------------------------
 void testApp::draw(){
 	
+	/*
 	int leftSpace = 100;
 	int space = 200-cellSize;
 	int height = 230;
@@ -153,7 +156,7 @@ void testApp::draw(){
 
 	ofSetColor(255);
 	ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate(), 0), 5, ofGetWindowHeight()-5);
-    
+    */
 }
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-//#include "PCA9685.h"
+#include "PCA9685.h"
 
  // set to -1 to not use the enable pin (its optional)
 
@@ -34,14 +34,14 @@ public:
 
 	float displayCoeff;
     
-    float noiseSpeedX, noiseSpeedY, noiseAmp, time;
+    float noiseSpeedX, noiseSpeedY, noiseAmp, time, timeInc;
 
 	
 	int numBoards;
 
 	ofVideoGrabber videoGrabber;
 	//ofTexture pixelTexture;
-//	PCA9685* pca; //initialize the class with number of boards
+	PCA9685* pca; //initialize the class with number of boards
 
 
 
