@@ -6,7 +6,7 @@
 //========================================================================
 int main( ){
 
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	
 	#ifdef TARGET_OPENGLES
 	ofSetCurrentRenderer(ofPtr<ofBaseRenderer>(new ofGLProgrammableRenderer()));
 	#endif

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <math.h>
+#include "ofMain.h"
 
         #define SUBADR1            0x02
         #define SUBADR2            0x03

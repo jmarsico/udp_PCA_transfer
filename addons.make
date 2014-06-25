@@ -2,7 +2,7 @@
 # uncomment a line below to include the addon
 
 #ofxXmlSettings
-#ofxNetwork
+ofxNetwork
 #ofxOpenCv
 #ofxOsc
 ofxWiringPi

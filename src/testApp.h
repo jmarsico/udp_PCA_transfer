@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "PCA9685.h"
+#include "ofxNetwork.h"
 
  // set to -1 to not use the enable pin (its optional)
 
@@ -11,36 +12,18 @@ public:
 
 	void setup();
 	void update();
-	void draw();
-	void runLights(float br[]);
-    void makeNoise(void);
-    float stevensLaw(float val);
-    
-    void testLights(void);
-
-	int val;
-	int valInc;
-
-
-	float br[30];
-    float noiseVal[30];
-	unsigned char* pixels;
-	int cellSize;
-	float cellSizeFl;
-	int numPixels;
-
-	int	cameraWidth;
-	int	cameraHeight;
-
-	float displayCoeff;
-    
-    float noiseSpeedX, noiseSpeedY, noiseAmp, time, timeInc;
-
+	void testLights();
+	int curvedMap(int inVal);
+	void killallLights();
+	
+	ofxUDPManager udpConnection;
 	
 	int numBoards;
+	//int val;
 
-	ofVideoGrabber videoGrabber;
-	//ofTexture pixelTexture;
+	int blankCounter;
+
+	
 	PCA9685* pca; //initialize the class with number of boards
 
 

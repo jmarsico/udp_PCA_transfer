@@ -1,40 +1,28 @@
 #include "testApp.h"
 
 
+
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	
+	ofSetLogLevel(OF_LOG_VERBOSE);
 
 	//construct new PCA9685 object with the number of boards you're using
-	numBoards = 2;
+	numBoards = 13;
 	pca = new PCA9685(numBoards);
-
-	
     ofSetVerticalSync(false);
-	cameraWidth		= 320;
-	cameraHeight	= 240;
-	cellSize = 48;
-	cellSizeFl  = (float)cellSize;
-	numPixels = (cameraWidth/cellSize) * (cameraHeight/cellSize);
-    ofLog() << "numPixels: " << numPixels;
 
-	displayCoeff = 1;
+    //test the lights before turning on UDP
+    //testLights();
+
+	udpConnection.Create();
+	udpConnection.Bind(11999);
+	udpConnection.SetNonBlocking(true);
 	
-	videoGrabber.listDevices();
-	videoGrabber.setDesiredFrameRate(60); 
-	videoGrabber.initGrabber(cameraWidth, cameraHeight);
-	pixels = new unsigned char[numPixels];
-
-    noiseSpeedX = 0.01;
-    noiseSpeedY = 0.01;
-    noiseAmp = 2000;
-    
-    time = 0;
-    timeInc = 0.1;
 
 	//on start-up, run through light test
-	testLights();
+	//val = 0;
+	blankCounter = 0;
 
 }
 
@@ -43,132 +31,80 @@ void testApp::setup()
 void testApp::update()
 {
 	
-//////////////////Prod Section //////////////////
-	videoGrabber.update();
-
-	
-	if(videoGrabber.isFrameNew())                            //if a new frame is available do this:
-    {
-        ofPixels pix = videoGrabber.getPixelsRef(); 
-        pix.mirror(false, true); 
-
-        for(int j = 0; j < cameraHeight/cellSize; j++)
-        {
-        	for (int i = 0; i < cameraWidth/cellSize; i++)
+	char udpMessage[200000];
+	int result = udpConnection.Receive(udpMessage,200000);
+	if(result > 0)
+	{
+		string message=udpMessage;
+		blankCounter = 0;
+		if(message!="")
+		{
+			int time = ofGetElapsedTimeMillis();
+			int chan, val;
+			vector<string> strVals = ofSplitString(message,"[/p]");
+			for(unsigned int i=0;i<strVals.size();i++)
 			{
-				int x = i*cellSize;
-				int y = j*cellSize;
-				br[(j*(cameraWidth/cellSize))+i] = (float)pix.getColor(x,y).getLightness();
-				br[(j*(cameraWidth/cellSize))+i] = ofMap(br[(j*(cameraWidth/cellSize))+i], 0, 255, 0, 2000);
+				vector<string> point = ofSplitString(strVals[i],"|");
+				if( point.size() == 2 )
+				{
+					chan=atoi(point[0].c_str());
+					val=atoi(point[1].c_str());
+					val = curvedMap(val);
+					pca->setLED(chan, val);
+				}
 			}
-        }
-    }
+			//ofLogVerbose() << "time for lights send: " << ofGetElapsedTimeMillis() - time;
+		}
+	}
+	else if (result < 0)
+	{
+		//ofLog() << "nothing there";
+		blankCounter ++;
+	}
 
-    makeNoise();
-    runLights(br);
-    ofLog() << ofGetFrameRate() ;  
+	if (blankCounter == 1000)
+	{
+		killallLights();
+
+	}
+
+ 	//testLights();
+ 	ofLogVerbose() << "FrameRate: " << ofGetFrameRate();
+
 }
-
-
-///////////////////////// NOISE ///////////////////////////////////
-void testApp::makeNoise(void)
-{
-    for(int i = 0; i < 30; i++)
-    {
-        noiseVal[i] = abs(noiseAmp * ofNoise(time * noiseSpeedX*(i+10), time*noiseSpeedY*(10-i)));
-       // ofLog() << "index: " << i << " || value: " << noiseVal[i];
-    }
-    time += timeInc;
-}
-
-
-/////////////////// STEVEN'S LAW /////////////////////////////////
-float testApp::stevensLaw(float val)
-{
-    float newVal;
-    if(val <= 255)
-    {
-       newVal = pow(255.0 * ((float)val/(float)255), 1.0/0.5) + 0.5;
-    }
-    
-    return newVal;
-}
-
-////////////////////// RUN LIGHTS //////////////////////////////////
-void testApp::runLights(float br[])
-{
-	int lightBright[16*numBoards];
-	for(int i = 0; i <30; i++)
-    {
-    	lightBright[i] = br[i] + noiseVal[i];
-    	
-    	//pca->setLED(i, br[i]);				//video only
-    	//pca->setLED(i, noiseVal[i]);			//noise only
-    	pca->setLED(i, lightBright[i]);			//video and noise
-    	
-
-    	//ofLog() << "channel: " << i << " value: " << noiseVal[i];
-    }
-}
-
-
-
 
 
 //--------------------------------------------------------------
-void testApp::draw(){
-	
-	/*
-	int leftSpace = 100;
-	int space = 200-cellSize;
-	int height = 230;
+int testApp::curvedMap(int inVal){
+	float shaper = 1.2;
+	float in = (float)inVal;
+	float pct = ofMap(in, 0, 255, 0, 1, true);
+	pct = powf(pct, shaper);
+	int outVal = (int)ofMap(pct, 0, 1, 0, 4095, true);
 
-	ofBackground(10, 10, 10);
-
-	ofSetColor(255);
-	videoGrabber.draw(leftSpace, height, cameraWidth*displayCoeff, cameraHeight*displayCoeff);
-	ofDrawBitmapString("Source", leftSpace, height-20);
-
-
-			
-	
-		//ofTranslate(cameraWidth+100,100);
-		//pixelTexture.draw(0,0);
-	
-	ofDrawBitmapString("Pixelated and Mirrored", cameraWidth*displayCoeff+leftSpace+space+cellSize, height - 20);
-
-	for(int j = 0; j < (cameraHeight/cellSize); j++)
-		{
-			for(int i = 0; i < (cameraWidth/cellSize); i++)
-			{
-				ofPushMatrix();
-				ofTranslate(space,0);
-				ofTranslate(i*cellSize*displayCoeff+cameraWidth*displayCoeff+space, j*cellSize*displayCoeff+height);
-				//ofSetColor(stevensLaw(br[j*(cameraWidth/cellSize)+i]));
-                //ofSetColor((noiseVal[j*(cameraWidth/cellSize)+i]) + ofMap(br[j*(cameraWidth/cellSize)+i], 0, 255, 0, 125));
-					ofRect(0.0,0.0,cellSizeFl*displayCoeff, cellSizeFl*displayCoeff);
-                    ofSetColor(255,0,0);
-                    ofDrawBitmapString(ofToString(j*(cameraWidth/cellSize)+i), 0,10);
-				ofPopMatrix();
-			}
-		}
-	//ofPopMatrix();
-	
-
-	ofSetColor(255);
-	ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate(), 0), 5, ofGetWindowHeight()-5);
-    */
+	return outVal;
 }
 
 
+//--------------------------------------------------------------
 void testApp::testLights(void)
 {
-	for(int val = 1; val < 4096; val+=200)
+    for(int i = 0; i < 16*numBoards; i++)
+    {
+	  pca->setLED(i, 4095);
+	  ofSleepMillis(100); 
+	  ofLog() << "light: " << i;
+	  pca->setLED(i,0);
+
+    }
+}
+
+
+//--------------------------------------------------------------
+void testApp::killallLights(){
+	for(int i = 0; i < 16 * numBoards; i++)
 	{
-	    for(int i = 0; i < 16*numBoards; i++)
-	    {
-		    pca->setLED(i, val); 
-	    }
+		pca->setLED(i, 0);
 	}
 }
 
