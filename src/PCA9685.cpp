@@ -5,8 +5,9 @@ PCA9685::PCA9685(int _numBoards)
 	numBoards = _numBoards;					//number of PCA9685 boards to be used
 	for(int i = 0; i < numBoards; i++)		//initialize an array of new board objects
 	{
+		int freqOffset = ofRandom(-100, 100);
 		pwm[i] = new PWM(64+i, true);
-		pwm[i] ->setPWMFreq(6000);
+		pwm[i] ->setPWMFreq(6000 + freqOffset);
 	}
 	ofLog() << "PCA Initialized with" << numBoards << "boards";
 }
