@@ -39,7 +39,6 @@ void testApp::update()
 		blankCounter = 0;
 		if(message!="")
 		{
-			int time = ofGetElapsedTimeMillis();
 			int chan, val;
 			vector<string> strVals = ofSplitString(message,"[/p]");
 			for(unsigned int i=0;i<strVals.size();i++)
@@ -53,7 +52,7 @@ void testApp::update()
 					pca->setLED(chan, val);
 				}
 			}
-			//ofLogVerbose() << "time for lights send: " << ofGetElapsedTimeMillis() - time;
+ 			ofLogVerbose() << "FrameRate: " << ofGetFrameRate();
 		}
 	}
 	else if (result < 0)
@@ -68,8 +67,6 @@ void testApp::update()
 
 	}
 
- 	//testLights();
- 	ofLogVerbose() << "FrameRate: " << ofGetFrameRate();
 
 }
 
