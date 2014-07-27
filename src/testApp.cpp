@@ -5,10 +5,11 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
+	ofSetFrameRate(60);
 	ofSetLogLevel(OF_LOG_VERBOSE);
 
 	//construct new PCA9685 object with the number of boards you're using
-	numBoards = 13;
+	numBoards = 11;
 	pca = new PCA9685(numBoards);
     ofSetVerticalSync(false);
 
@@ -39,7 +40,6 @@ void testApp::update()
 		blankCounter = 0;
 		if(message!="")
 		{
-			int time = ofGetElapsedTimeMillis();
 			int chan, val;
 			vector<string> strVals = ofSplitString(message,"[/p]");
 			for(unsigned int i=0;i<strVals.size();i++)
@@ -53,7 +53,7 @@ void testApp::update()
 					pca->setLED(chan, val);
 				}
 			}
-			//ofLogVerbose() << "time for lights send: " << ofGetElapsedTimeMillis() - time;
+ 			ofLogVerbose() << "FrameRate: " << ofGetFrameRate();
 		}
 	}
 	else if (result < 0)
@@ -68,8 +68,6 @@ void testApp::update()
 
 	}
 
- 	//testLights();
- 	ofLogVerbose() << "FrameRate: " << ofGetFrameRate();
 
 }
 
